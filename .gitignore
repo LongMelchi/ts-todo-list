@@ -1,0 +1,17 @@
+# 依赖目录（太大，不需要上传）
+node_modules/
+
+# 编译输出（可以从源码重新生成）
+dist/
+
+# 编辑器配置
+.vscode/
+.idea/
+.obsidian/
+
+# 日志文件
+*.log
+
+# 环境变量（包含敏感信息）
+.env
+.env.local
