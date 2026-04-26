@@ -3,7 +3,7 @@
     /* 语言与环境设置 */
     "target": "ES2020",
     "module": "commonjs",
-    "lib": ["ES2020"],
+    "lib": ["ES2020", "dom"],
 
     /* 输出配置 */
     "outDir": "./dist",

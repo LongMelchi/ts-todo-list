@@ -664,17 +664,17 @@ origin  https://github.com/YOUR_USERNAME/ts-todo-list.git (push)
 
 ```bash
 # 第一次推送需要 -u 参数，建立本地分支和远程分支的关联
-git push -u origin main
+git push -u origin master
 ```
 
 **📚 命令详解**：
 
-| 部分 | 含义 |
-|------|------|
-| `push` | 推送（将本地提交上传到远程） |
-| `-u` | upstream（设置上游分支，以后可以直接 `git push`） |
-| `origin` | 推送到哪个远程仓库 |
-| `main` | 推送哪个本地分支 |
+| 部分       | 含义                                 |
+| -------- | ---------------------------------- |
+| `push`   | 推送（将本地提交上传到远程）                     |
+| `-u`     | upstream（设置上游分支，以后可以直接 `git push`） |
+| `origin` | 推送到哪个远程仓库                          |
+| `master` | 推送哪个本地分支                           |
 
 **如果推送时要求登录**：
 - 会弹出浏览器窗口让你授权 GitHub
