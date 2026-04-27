@@ -1871,38 +1871,247 @@ npm run build
 
 ### 步骤 6.2：运行完整测试
 
+为了确保应用在各种场景下都能正常工作，我们需要进行更全面的测试，包括大数据量测试（50条任务）。
+
+#### 测试目标
+- 验证应用在处理大量数据时的性能和稳定性
+- 测试所有核心功能的正确性
+- 确保边界情况的处理
+
+#### 测试环境准备
+
+1. 首先编译项目确保无错误：
+```bash
+npm run build
+```
+
+2. 确保测试文件存在：
+```bash
+# 在 src 目录下创建性能测试文件
+touch src/performance-test.ts
+```
+
+#### 测试 1：大数据量测试（50条任务）
+
+在 `src/performance-test.ts` 文件中添加以下代码：
+
+```typescript
+import { TodoManager } from './todo';
+import { TodoStatus } from './types';
+import { formatTodoTable, formatStatistics } from './utils';
+
+console.log('=== 大数据量测试（50条任务）===');
+
+const manager = new TodoManager();
+const startTime = Date.now();
+
+// 生成 50 条测试数据
+for (let i = 1; i <= 50; i++) {
+    const title = `任务 ${i}`;
+    const description = i % 5 === 0 ? `这是任务 ${i} 的详细描述，包含更多信息` : undefined;
+    manager.addTodo(title, description);
+    
+    // 每10个任务切换一个状态
+    if (i % 10 === 0) {
+        manager.toggleTodoStatus(i, TodoStatus.IN_PROGRESS);
+    } else if (i % 7 === 0) {
+        manager.toggleTodoStatus(i, TodoStatus.COMPLETED);
+    }
+}
+
+const endTime = Date.now();
+console.log(`✅ 生成 50 条任务耗时: ${endTime - startTime}ms`);
+
+// 测试获取所有任务
+const allTodos = manager.getAllTodos();
+console.log(`✅ 总任务数: ${allTodos.length}`);
+
+// 测试统计信息
+const stats = manager.getStatistics();
+console.log('📊 统计信息:');
+console.log(formatStatistics(stats));
+
+// 测试按状态筛选
+console.log('\n=== 按状态筛选测试 ===');
+console.log(`待处理任务数: ${manager.getTodosByStatus(TodoStatus.PENDING).length}`);
+console.log(`进行中任务数: ${manager.getTodosByStatus(TodoStatus.IN_PROGRESS).length}`);
+console.log(`已完成任务数: ${manager.getTodosByStatus(TodoStatus.COMPLETED).length}`);
+
+// 测试搜索功能
+console.log('\n=== 搜索功能测试 ===');
+const searchResults = manager.searchTodos('任务 1');
+console.log(`搜索 "任务 1" 结果数: ${searchResults.length}`);
+
+// 测试清理已完成任务
+console.log('\n=== 清理已完成任务测试 ===');
+const completedCount = manager.removeCompletedTodos();
+console.log(`清理了 ${completedCount} 个已完成任务`);
+console.log(`清理后总任务数: ${manager.getAllTodos().length}`);
+
+// 测试性能：批量操作
+console.log('\n=== 批量操作性能测试 ===');
+const batchStartTime = Date.now();
+
+// 批量添加 10 个任务
+for (let i = 51; i <= 60; i++) {
+    manager.addTodo(`批量任务 ${i}`);
+}
+
+// 批量更新状态
+for (let i = 51; i <= 60; i++) {
+    manager.toggleTodoStatus(i, TodoStatus.COMPLETED);
+}
+
+const batchEndTime = Date.now();
+console.log(`✅ 批量操作耗时: ${batchEndTime - batchStartTime}ms`);
+
+// 测试清空功能
+console.log('\n=== 清空功能测试 ===');
+manager.clearAll();
+console.log(`清空后任务数: ${manager.getAllTodos().length}`);
+console.log(`下一个 ID: ${manager.getNextId()}`);
+
+console.log('\n🎉 大数据量测试完成！');
+```
+
+运行测试：
+```bash
+npx ts-node src/performance-test.ts
+```
+
+#### 测试 2：边界情况测试
+
+在 `src/edge-case-test.ts` 文件中添加以下代码：
+
+```typescript
+import { TodoManager } from './todo';
+import { TodoStatus } from './types';
+
+console.log('=== 边界情况测试 ===');
+
+const manager = new TodoManager();
+
+// 测试 1：空标题
+console.log('\n1. 测试空标题:');
+try {
+    const result = manager.addTodo('   ');
+    console.log('❌ 错误：应该拒绝空标题');
+} catch (error) {
+    console.log('✅ 正确：拒绝了空标题');
+}
+
+// 测试 2：不存在的任务 ID
+console.log('\n2. 测试不存在的任务 ID:');
+const result1 = manager.toggleTodoStatus(999);
+console.log(`切换不存在任务状态: ${result1} (应为 false)`);
+
+const result2 = manager.removeTodo(999);
+console.log(`删除不存在任务: ${result2} (应为 false)`);
+
+// 测试 3：状态切换边界
+console.log('\n3. 测试状态切换边界:');
+const todo = manager.addTodo('测试状态切换');
+console.log(`初始状态: ${todo.status}`);
+
+// 循环切换状态
+for (let i = 0; i < 5; i++) {
+    manager.toggleTodoStatus(todo.id);
+    const updated = manager.getTodoById(todo.id);
+    console.log(`切换后状态 ${i+1}: ${updated?.status}`);
+}
+
+// 测试 4：搜索空关键词
+console.log('\n4. 测试搜索空关键词:');
+const emptySearch = manager.searchTodos('');
+console.log(`空关键词搜索结果数: ${emptySearch.length} (应为 1)`);
+
+// 测试 5：清理空列表
+console.log('\n5. 测试清理空列表:');
+const count = manager.removeCompletedTodos();
+console.log(`清理空列表删除数: ${count} (应为 0)`);
+
+console.log('\n🎉 边界情况测试完成！');
+```
+
+运行测试：
+```bash
+npx ts-node src/edge-case-test.ts
+```
+
+#### 测试 3：手动交互测试
+
+除了自动化测试，我们还需要进行手动交互测试，确保用户界面正常工作：
+
 ```bash
 npm start
 ```
 
-按照以下清单逐一测试：
+按照以下步骤测试：
 
 ##### ✅ 测试 1：添加任务
 1. 选择 `1`（添加新任务）
 2. 输入标题："学习 TypeScript"
-3. 输入描述：（可选）
-4. 应显示"任务添加成功"
+3. 输入描述："完成基础教程"
+4. 应显示"任务添加成功"和任务详情
 
 ##### ✅ 测试 2：显示任务
-1. 先添加几个任务
+1. 添加几个不同状态的任务
 2. 选择 `2`（显示所有任务）
-3. 应显示表格和统计信息
+3. 应显示格式化的表格和统计信息
+4. 按回车返回主菜单
 
 ##### ✅ 测试 3：切换状态
 1. 选择 `3`（切换状态）
 2. 输入任务 ID
-3. 选择新状态
-4. 应显示更新后的任务
+3. 选择不同的状态选项进行测试
+4. 应显示更新后的任务信息
 
 ##### ✅ 测试 4：清理已完成
-1. 将某个任务标记为已完成
+1. 将多个任务标记为已完成
 2. 选择 `4`（清理已完成）
-3. 确认删除
-4. 应显示删除数量
+3. 查看待删除的任务列表
+4. 输入 `y` 确认删除
+5. 应显示删除数量和更新后的统计信息
 
-##### ✅ 测试 5：退出
+##### ✅ 测试 5：无效输入处理
+1. 在主菜单输入非数字（如 `abc`）
+2. 应显示"无效的选择！"
+3. 测试 ID 输入时输入非数字
+4. 应显示"无效的 ID！"
+
+##### ✅ 测试 6：退出
 1. 选择 `5`（退出）
-2. 应显示告别信息并退出
+2. 应显示告别信息并正常退出
+
+#### 测试结果分析
+
+完成所有测试后，你应该检查：
+
+1. **性能测试**：
+   - 50 条任务的生成时间应在合理范围内（通常 < 100ms）
+   - 批量操作应响应迅速
+   - 内存使用应稳定，无明显泄漏
+
+2. **功能测试**：
+   - 所有核心功能应正常工作
+   - 边界情况应正确处理
+   - 错误输入应有合理的提示
+
+3. **用户体验**：
+   - 命令行界面应清晰美观
+   - 操作流程应顺畅
+   - 响应时间应合理
+
+#### 清理测试文件
+
+测试完成后，可以删除测试文件：
+
+```bash
+rm src/performance-test.ts src/edge-case-test.ts
+# Windows: del src\performance-test.ts src\edge-case-test.ts
+```
+
+或者保留它们作为项目的测试套件。
 
 ---
 

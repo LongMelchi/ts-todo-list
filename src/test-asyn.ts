@@ -53,7 +53,7 @@ function fetchUser(id: number) {
 async function getUserInfo() {
   console.log("正在获取用户信息...");
   const user = await fetchUser(1);
-  console.log(`用户名: ${user.name}, 年龄: ${user.age}`);
+  console.log(`用户名: ${(user as { name: string; age: number }).name}, 年龄: ${(user as { name: string; age: number }).age}`);
 }
 
 getUserInfo()
@@ -117,14 +117,14 @@ async function handleRequest() {
     const result = await mayFail(false);
     console.log(result); // "成功!"
   } catch (error) {
-    console.log("捕获到错误:", error.message);
+    console.log("捕获到错误:", (error as Error).message);
   }
 
   try {
     const result = await mayFail(true);
     console.log(result);
   } catch (error) {
-    console.log("捕获到错误:", error.message); // "出错了!"
+    console.log("捕获到错误:", (error as Error).message); // "出错了!"
   }  
 
 }
