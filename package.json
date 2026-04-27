@@ -9,11 +9,15 @@
     "run": "node dist/index.js",
     "dev": "ts-node --watch src/index.ts"
   },
-  "keywords": ["todo", "cli", "typescript"],
+  "keywords": [
+    "todo",
+    "cli",
+    "typescript"
+  ],
   "author": "Your Name",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "^20.11.0",
+    "@types/node": "^20.19.39",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }

@@ -132,6 +132,11 @@ export function clearScreen(): void { console.clear(); }
 export function showSeparator(): void { console.log("-".repeat(80)); }
 
 
-
+/**
+ * 延迟执行（配合 await 使用实现等待效果）
+ */
+export function delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 

@@ -4,7 +4,8 @@
     "target": "ES2020",
     "module": "commonjs",
     "lib": ["ES2020", "dom"],
-
+    "types": ["node"], // 添加这一行
+    
     /* 输出配置 */
     "outDir": "./dist",
     "rootDir": "./src",
